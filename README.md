@@ -7,28 +7,35 @@
 차량의 다양한 특성(제조사, 모델, 연식, 상태 등)에 따라 **합리적인 가격을 예측하는 회귀 모델**을 구축하는 데 목적이 있습니다.
 
 - 데이터 출처: Dubizzle 중고차 플랫폼 크롤링 데이터
-- 타겟 변수: `price_in_aed` (중고차 가격)
+- 타겟 변수: 차량 가격 (`price_in_aed`)
 - 분석 도구: Python, Pandas, Scikit-Learn, XGBoost
 
 ## 📊 데이터 전처리 및 정제
 
 1. **결측치 처리**
-   - `year`, `no_of_cylinders`: 최빈값으로 대체
-   - `horsepower`, `model`, `motors_trim`: 결측치가 많은 경우 제거
+   - 연식 (`year`), 실린더 수 (`no_of_cylinders`): 최빈값으로 대체
+   - 마력 (`horsepower`), 모델명 (`model`), 트림명 (`motors_trim`): 결측치 행을 제거 
 
 2. **파생 변수 생성**
-   - `date_posted` → `year_posted`, `month_posted`, `dayofweek_posted` 추출
-   - `body_condition`, `mechanical_condition`: 텍스트 → 가중치 인코딩
+   - 게시일자(`date_posted`) → 연(`year_posted`), 월(`month_posted`), 요일(`dayofweek_posted`) 파생
 
 3. **범주형 변수 인코딩 전략**
 
-| 컬럼명             | 인코딩 방식      | 이유 요약 |
-|------------------|------------------|-----------|
-| `seller_type`    | 원-핫 인코딩       | 순서 없음 |
-| `fuel_type`      | 가중치 인코딩     | 가격 영향력 반영 |
-| `company`        | 군집 기반 가중치 | 제조사별 가격 차이 반영 |
-| `model`          | 제조사별 군집화   | 고카디널리티 + 가격 변동 |
-| `motors_trim`    | 모델별 군집화     | 트림에 따른 가격차 반영 |
+| 변수 설명               | 변수명             | 인코딩 방식      | 이유 요약 |
+|------------------------|-------------------|------------------|-----------|
+| 판매자 유형            | `seller_type`     | 원-핫 인코딩       | 순서 없음 |
+| 연료 유형              | `fuel_type`       | 가중치 인코딩     | 가격 영향력 반영 |
+| 제조사                | `company`         | 군집 기반 가중치 | 제조사별 가격 차이 반영 |
+| 모델명                | `model`           | 제조사별 군집화   | 고카디널리티 + 가격 변동 |
+| 트림명                | `motors_trim`     | 모델별 군집화     | 트림에 따른 가격차 반영 |
+| 차체 상태             | `body_condition`  | 가중치 인코딩     | 상태별 가격 차이 반영 |
+| 기계 상태             | `mechanical_condition` | 가중치 인코딩 | 성능 상태가 가격에 영향 |
+| 변속기                | `transmission_type` | 원-핫 인코딩    | 이산형 명목 변수 |
+| 지역 사양             | `regional_specs`  | 원-핫 인코딩 또는 가중치 | 수요 및 사양 영향 |
+| 색상                  | `color`           | 원-핫 또는 주색군 통합 | 감성 변수 |
+| 등록 지역             | `emirate`         | 원-핫 인코딩       | 지역 수요 분포 |
+| 운전석 위치           | `steering_side`   | 원-핫 인코딩       | 좌/우측 구분 |
+| 게시일자(연/월/요일) | `year_posted`, `month_posted`, `dayofweek_posted` | 정수형 | 시간 요소 반영 |
 
 ## 🧠 모델링 및 성능
 
@@ -47,10 +54,10 @@
 
 ```python
 {
-  'learning_rate': 0.5,
-  'max_depth':8,
+  'learning_rate': 0.1,
+  'max_depth': 6,
   'n_estimators': 200,
-  'subsample': 0.8
+  'subsample': 1.0
 }
 ```
 
